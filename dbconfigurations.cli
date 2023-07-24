@@ -1,0 +1,23 @@
+embed-server --admin-only=true --server-config=standalone-openshift.xml
+
+
+
+/subsystem=datasources/data-source=KeycloakDS:remove()
+
+
+
+module add --name=com.microsoft.sqlserver --resources=/opt/eap/extensions/jdbc-driver.jar --dependencies=javax.api,javax.transaction.api,javax.xml.bind.api
+
+
+
+/subsystem=datasources/jdbc-driver=sqlserver:add(driver-name=sqlserver, driver-module-name=com.microsoft.sqlserver, driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver, driver-xa-datasource-class-name=com.microsoft.sqlserver.jdbc.SQLServerXADataSource) 
+
+
+
+data-source add --name=KeycloakDS  --enabled=true --driver-name=${env.DB_VENDOR:sqlserver} --jndi-name=java:jboss/datasources/KeycloakDS --use-java-context=true --min-pool-size=8 --max-pool-size=200 --blocking-timeout-wait-millis=7000 --background-validation=true --background-validation-millis=12000 --validate-on-match=false --check-valid-connection-sql="SELECT 1" --flush-strategy=IdleConnections --connection-url="jdbc:sqlserver://${env.DB_ADDR:MSSQL}:${env.DB_PORT:1460};database\=${env.DB_DATABASE:KeycloakDS}" --user-name=${env.DB_USER:SA} --password=${env.DB_PASSWORD:aA1C2RQotnj}
+
+
+
+
+
+stop-embedded-server 
